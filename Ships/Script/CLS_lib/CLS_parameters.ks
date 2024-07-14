@@ -156,6 +156,19 @@ Function launchParameters {
 	local randomFailureChance3i is line8:addtextfield("25").
 	line8:hide().
 	
+	//Data Logging
+	local line9 is HUD_gui:ADDHLAYOUT().
+	local dataLoggingLabel is line9:addLabel("Data Logging").
+	local dataLoggingInput1 is line9:addbutton("Enabled").
+	local dataLoggingInput2 is line9:addbutton("Disabled").
+	set dataLoggingInput2:pressed to true.
+	set dataLoggingInput1:toggle to true.
+	set dataLoggingInput1:exclusive to true.
+	set dataLoggingInput1:style:width to 60.
+	set dataLoggingInput2:toggle to true.
+	set dataLoggingInput2:exclusive to true.
+	set dataLoggingInput2:style:width to 60.
+	
 	//Confirm
 	local confirm is HUD_gui:addbutton("Confirm Settings").
 	set confirm:onclick to { set userInput to true.}.
@@ -294,6 +307,13 @@ Function launchParameters {
 				global lFailure is false.
 				global lFailureApo is 9999999999.
 			}
+			
+			//Data Logging
+			if dataLoggingInput1:pressed {
+				set dataLogging to true.
+			} else {
+				set dataLogging to false.
+			}
 			wait 0.001.
 		}
 		//Warnings
@@ -398,7 +418,7 @@ Function launchParameters {
 			output:add(tMStages).   	//[4] Max Stages
 			output:add(lFailure).		//[5] Random launch failure
 			output:add(lFailureApo). 	//[6] Launch failure apoapsis
-			
+			output:add(dataLogging).	//[7] Data logging
 			HUD_gui:hide().
 			return output.
 		}

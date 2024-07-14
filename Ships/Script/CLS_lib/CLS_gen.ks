@@ -39,7 +39,19 @@ Function realWorldTime {
 	local hours is floor(rwtime/3600).
 	set rwtime to rwtime-(hours*3600).
 	local minutes is floor(rwtime/60).
-	return hours+1 + "." + minutes.
+	set rwtime to rwtime-(minutes*60).
+	local seconds is floor(rwtime).
+	local hours is mod(hours+1,24).
+	if hours < 10 {
+		set hours to "0" + hours.
+	}
+	if minutes < 10 {
+		set minutes to "0" + minutes.
+	}
+	if seconds < 10 {
+		set seconds to "0" + seconds.
+	}	
+	return hours + "." + minutes + "." + seconds.
 }
 
 //Camera control function

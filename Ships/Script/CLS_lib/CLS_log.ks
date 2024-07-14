@@ -4,10 +4,9 @@
 
 // Creates new log file for flight data
 Function logInitialise {
-	parameter vessApoapsis.
-	parameter vessPeriapsis.
-	parameter vessInclination.
-	parameter abort.
+	parameter tgtApoapsis.
+	parameter tgtPeriapsis.
+	parameter tgtInclination.
 	local year is (time:year):tostring().
 	local day is (time:day):tostring().
 	local hour is (time:hour):tostring().
@@ -20,70 +19,49 @@ Function logInitialise {
 	if minute:length < 2 {
 		set minute to "0" + minute.
 	}
-	local logname is "Y"+year+"_"+"D"+day+"_"+hour+"."+minute+"_"+vesselName+"_"+realTime.
-	if abort = true {
-		set logname to "Y"+year+"_"+"D"+day+"_"+hour+"."+minute+"_"+vesselName+"_ABORT_"+realTime.
-	}
+	local logname is "Y"+year+" "+"D"+day+" "+hour+"."+minute+" "+vesselName+" ("+realTime+")".
 	global logpath is path("0:/CLS_lib/logs/" + logname + ".csv").
-	global missionTimeLog is 0.
-	global cdownLog is -20.
-	Log ("Apoapsis,"+(vessApoapsis/1000)+"km"+" Periapsis,"+(vessPeriapsis/1000)+"km"+" ,Inc,"+round(vessInclination,2)) to logPath.
+	Log ("Apoapsis,"+(tgtApoapsis/1000)+"km,"+"Periapsis,"+(tgtPeriapsis/1000)+"km"+",Inc,"+round(tgtInclination,2)) + ",Vessel," + vesselName to logPath.
 	Log (" ") to logPath.
-	if abort = false {
-		Log ("MET,vehicleConfig,dV,TWR,Throttle,Pitch,Q,Alt,vessApoapsis,Eta:apo,vessPeriapsis,Stage,Staging,Runmode,Parts,Peri Circ,Apo Circ,3burn Circ,Est Rem dV,Time") to logPath.
-	} else {
-		Log ("MET,vehicleConfig,dV,TWR,Throttle,Pitch,Q,Alt,vessApoapsis,Eta:apo,vessPeriapsis,Stage,Staging,Runmode,Parts,Peri Circ,Apo Circ,3burn Circ,Est Rem dV,Time") to logPath.
-	}
+	Log ("MET,vehicleConfig,dV,TWR,Throttle,Pitch,ProgradePitch,Heading,Azimuth,Steering Error,Q,Alt,Apoapsis,Eta:Apo,Periapsis,Eta:Peri,Stage,Staging,PayloadProtection,Runmode,Expected Parts,Detected Parts,Time") to logPath.
 }
 
-// example use - log_data(LIST(newTime,newAlt,newVel:MAG,newDynamicP,dragForce,newAtmPressure,atmDencity*1000,dragCoef,thermalMassIsh,atmTemp,mach),logPath).
+// example use - log_data(LIST(newTime,newAlt,newVel:MAG,newDynamicP,dragForce,newAtmPressure,atmDencity*1000,dragCoef,thermalMassIsh,atmTemp,mach)).
 // Logs data from list to log file specified
 function log_data {
-	Parameter missionElapsedTime,logData,logpath.
+	Parameter logData is list(missionElapsedTime,vehicleConfig,dvRemaining,vesTWR,throttle,trajectorypitch,pitch_for_vector(Ship:srfprograde:forevector),heading_for(),launchazimuth,Vang(Ship:facing:vector, steering:vector),ship:q,ship:altitude,ship:apoapsis,eta:apoapsis,ship:periapsis,eta:periapsis,currentstagenum,staginginprogress,PayloadProtection,runmode,numparts,Ship:parts:length,realWorldTime():tostring()).
 	if missionElapsedTime > missionTimeLog {
-		local logString is "".
-		For data in logData {
-			if (data):typename() = "String" or (data):typename() = "Boolean" {
-				set logString to logString + data + ",".			//Rounds all scaler values to 2 sign numbers
-			} else {
-				set logString to logString + round(data,2) + ",".
-			}
-		}
-		logString:remove((logString:length - 1),1).
-		Log logString TO logpath.
+		Log logData:join(",") TO logpath.
 		set missionTimeLog to missionElapsedTime+0.5.
 	}
 }
 
-// Logs data from list to log file specified
-//Specific for countdown
-function log_data_cdown {
-	Parameter cdown,logData,logpath.
-	if cdown > cdownLog {
-		local logString is "".
-		For data in logData {
-			if (data):typename() = "String" or (data):typename() = "Boolean" {
-				set logString to logString + data + ",".			//Rounds all scaler values to 2 sign numbers
-			} else {
-				set logString to logString + round(data,2) + ",".
-			}
-		}
-		logString:remove((logString:length - 1),1).
-		Log logString TO logpath.
-		set cdownLog to cdownLog+0.5.
-	}
-}
-
 function log_abort {
-	Parameter logData,logpath.
-	local logString is "".
-	For data in logData {
-		if (data):typename() = "String" or (data):typename() = "Boolean" {
-			set logString to logString + data + ",".			//Rounds all scaler values to 2 sign numbers
-		} else {
-			set logString to logString + round(data,2) + ",".
-		}
-		logString:remove((logString:length - 1),1).
-		Log logString TO logpath.
+	Parameter logData is list(missionElapsedTime,vehicleConfig,dvRemaining,vesTWR,ship:verticalspeed,throttle,trajectorypitch,pitch_for_vector(Ship:srfprograde:forevector),heading_for(),launchazimuth,Vang(Ship:facing:vector, steering:vector),ship:q,ship:altitude,ship:apoapsis,eta:apoapsis,ship:periapsis,eta:periapsis,currentstagenum,round(ship:electriccharge/BatteryCapacity,2)*100,staginginprogress,PayloadProtection,runmode,numparts,Ship:parts:length,realWorldTime():tostring()).
+	local year is (time:year):tostring().
+	local day is (time:day):tostring().
+	local hour is (time:hour):tostring().
+	local minute is (time:minute):tostring().
+	local vesselName is ship:name.
+	local realTime is realWorldTime():tostring().
+	if hour:length < 2 {
+		set hour to "0" + hour.
+	}
+	if minute:length < 2 {
+		set minute to "0" + minute.
+	}
+	local logname is "Y"+year+" "+"D"+day+" "+hour+"."+minute+" "+vesselName+" (Abort "+realTime+")".
+	global logpath is path("0:/CLS_lib/logs/" + logname + ".csv").
+	Log ("Altitude,"+(round(ship:altitude,2)/1000)+"km,"+"MET,"+missionElapsedTime + ",Vessel," + vesselName + ",AbortReason," + abortReason) to logPath.
+	Log (" ") to logPath.
+	Log ("MET,vehicleConfig,dV,TWR,VerticalSpeed,Throttle,Pitch,ProgradePitch,Heading,Azimuth,Steering Error,Q,Alt,Apoapsis,Eta:Apo,Periapsis,Eta:Peri,Stage,EC,Staging,PayloadProtection,Runmode,Expected Parts,Detected Parts,Time") to logPath.
+	Log logData:join(",") TO logpath.
+	Log (" ") to logPath. Log ("Ship Parts:") to logPath.
+	for p in ship:parts {
+		log p:title to logPath.
+	}
+	Log (" ") to logpath. Log ("Ascent Events") to logpath.
+	for printline in printqueue {
+		Log printline to logPath.
 	}
 }

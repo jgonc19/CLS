@@ -165,6 +165,7 @@ Function HUDinit {
 	Parameter targetapoapsis.
 	Parameter targetperiapsis.
 	Parameter targetinclination.
+	Parameter dataLogging.
 	
 	Print Ship:name + " Launch Sequence Initialised" at (0,0).
 	Print "Target Launch Time: NET " + T_O_D(launchtime) at (0,1).
@@ -174,7 +175,12 @@ Function HUDinit {
 		Print "Target Parking Orbit: " + Ceiling(targetapoapsis/1000,2) + "km x " + Ceiling(targetperiapsis/1000,2) + "km" at (0,2).
 	}
 	Print "Target Orbit Inclination: " + Ceiling(targetinclination,2) + "°" at (0,3).
-	Print "----------------------------------------------------" at (0,39).
+	if dataLogging {
+		Print "---Logging-Data-------------------------------------" at (0,39).
+	
+	} else {
+		Print "----------------------------------------------------" at (0,39).
+	}
 }
 
 // Identifies / Calculates data to be displayed on the terminal HUD.
@@ -188,7 +194,7 @@ Function AscentHUD {
 	local hud_peri is "Per: " + floor(ship:periapsis/1000,2) + "km   ".
 	local hud_peri_eta is "eta: " + round(eta:periapsis,0) + "s    ".
 	local hud_ecc is "Ecc: " + max(Round(ship:orbit:eccentricity,4),0.0001).
-	local hud_inc is "Inc: " + Round(ship:orbit:inclination,4) + "°  ".
+	local hud_inc is "Inc: " + Round(ship:orbit:inclination,4) + "°   ".
 	local hud_isp is "ISP: " + Round(averageIsp,1) + "s   ".
 	local hud_dV is " dV: " + Round(dVRemaining) + "m/s  ".
 	local hud_dV_req is "Req: ------- ".
@@ -196,7 +202,7 @@ Function AscentHUD {
 	local hud_head is "Head:  " + Round(launchazimuth,1) + "°   ".
 	local hud_fuel is "Fuel:  " + min(999,Round(BurnRemaining)) + "s  ".
 	local hud_twr is "TWR:   " + Round(max(vesTWR,0),2) + "   ".
-	local hud_throttle is "Throt: " + Round(max(min(throttle,1),0)*100,1) + "%  ".
+	local hud_throttle is "Throt: " + Round(max(min(throttle,1),0)*100,1) + "%   ".
 	
 	if eta:apoapsis > 300 {
 		set hud_apo_eta to "eta: " + floor(eta:apoapsis/60) + "m    ".
@@ -222,8 +228,8 @@ Function AscentHUD {
 	}
 	if runmode > 2 {
 		if hasnode {
-			set hud_pitch to "Circ:  " + Round(max(0,burnDuration-max(0,time:seconds-burnStartTime)),1) + "s  ".
-			set hud_head to "Eta:   " + Round(max(burnStartTime-time:seconds,0),0) + "s  ".
+			set hud_pitch to "Circ:  " + Round(max(0,burnDuration-max(0,time:seconds-burnStartTime)),1) + "s   ".
+			set hud_head to "Eta:   " + Round(max(burnStartTime-time:seconds,0),0) + "s   ".
 		} else {
 			set hud_pitch to "Circ:  " + "N/A  ".
 			set hud_head to "Eta:   " + "N/A  ".

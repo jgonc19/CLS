@@ -33,7 +33,7 @@ Function twrthrottle {
 	} else {
 		local engThrust is PartlistAvailableThrust(aelist).
 		local srbThrust is PartlistCurrentThrust(asrblist).
-		if runmode = 0 and tminus > 0 {
+		if runmode = 0 { 
 			set srbThrust to PartlistPotentialThrust(asrblist).
 		}
 		set twrThrot to (ship:mass*g*targetTWR-srbThrust)/engThrust.
