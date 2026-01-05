@@ -237,6 +237,7 @@ Function launchParameters {
 			} else if tWindowButton3:pressed {
 				line2:show().
 				lineh2:hide().
+				lineh6:show().
 				line4:hide().
 				if tWindowInput3a:text:length > 0 {
 					global tWindow is launchWindowContract(tInc,tWindowInput3a:text:tonumber())-(time:seconds+halflaunch).
@@ -404,4 +405,5 @@ Function launchParameters {
 		}
 		wait 0.001.
 	}
+
 }	
